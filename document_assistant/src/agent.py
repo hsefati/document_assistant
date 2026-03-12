@@ -108,8 +108,6 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     # Default to "qa_agent" if intent is unknown or missing
     next_step = intent_map.get(intent_output.intent_type, "qa_agent")
 
-    # TODO: Add conditional logic to set next_step based on intent
-
     return {
         "intent": intent_output,
         "next_step": next_step,
