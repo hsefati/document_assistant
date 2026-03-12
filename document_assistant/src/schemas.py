@@ -17,7 +17,7 @@ class DocumentChunk(BaseModel):
     )
 
 
-class QAResponse(BaseModel):
+class AnswerResponse(BaseModel):
     """Structured response for Q&A tasks"""
 
     question: str = Field(description="The original user question")
