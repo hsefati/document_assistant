@@ -13,22 +13,17 @@ from langgraph.prebuilt import create_react_agent, tools_condition, ToolNode
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain_core.messages import (
     BaseMessage,
-    HumanMessage,
-    AIMessage,
-    SystemMessage,
     ToolMessage,
 )
-import re
 import operator
 from document_assistant.src.schemas import (
     UserIntent,
-    SessionState,
     AnswerResponse,
     SummarizationResponse,
     CalculationResponse,
     UpdateMemoryResponse,
 )
-from prompts import (
+from document_assistant.src.prompts import (
     get_intent_classification_prompt,
     get_chat_prompt_template,
     MEMORY_SUMMARY_PROMPT,
@@ -97,8 +92,8 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     prompt_template = get_intent_classification_prompt()
     formatted_prompt = prompt_template.invoke(
         {
-            "input": user_input,
-            "chat_history": history,
+            "user_input": user_input,
+            "conversation_history": history,
         }
     )
 
@@ -111,7 +106,7 @@ def classify_intent(state: AgentState, config: RunnableConfig) -> AgentState:
     }
 
     # Default to "qa_agent" if intent is unknown or missing
-    next_step = intent_map.get(intent_output.intent, "qa_agent")
+    next_step = intent_map.get(intent_output.intent_type, "qa_agent")
 
     # TODO: Add conditional logic to set next_step based on intent
 
@@ -272,4 +267,5 @@ def create_workflow(llm, tools):
     workflow.add_edge("update_memory", END)
 
     # Compile with InMemorySaver checkpointer for state persistence
-    return workflow.compile(checkpointer=InMemorySaver())
+    checkpointer = InMemorySaver()
+    return workflow.compile(checkpointer=checkpointer)

@@ -1,5 +1,6 @@
 import os
 import json
+import warnings
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 import uuid
@@ -7,11 +8,14 @@ import uuid
 from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 
-from schemas import SessionState
-from retrieval import SimulatedRetriever
-from tools import get_all_tools, ToolLogger
+from document_assistant.src.schemas import SessionState
+from document_assistant.src.retrieval import SimulatedRetriever
+from document_assistant.src.tools import get_all_tools, ToolLogger
 from document_assistant.src.agent import create_workflow, AgentState
-from prompts import MEMORY_SUMMARY_PROMPT
+from document_assistant.src.prompts import MEMORY_SUMMARY_PROMPT
+
+# Suppress msgpack deserialization warnings for custom Pydantic models
+warnings.filterwarnings("ignore", message=".*Deserializing unregistered type.*")
 
 
 class DocumentAssistant:
