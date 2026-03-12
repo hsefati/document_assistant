@@ -10,19 +10,69 @@ def get_intent_classification_prompt() -> PromptTemplate:
         input_variables=["user_input", "conversation_history"],
         template="""You are an intent classifier for a document processing assistant.
 
-Given the user input and conversation history, classify the user's intent into one of these categories:
-- qa: Questions about documents or records that do not require calculations.
+Your task is to classify the user's intent into one of these categories:
+- qa: Questions about documents or records that do not require calculations. (searches, lookups, factual inquiries)
 - summarization: Requests to summarize or extract key points from documents that do not require calculations.
-- calculation: Mathematical operations or numerical computations. Or questions about documents that may require calculations
-- unknown: Cannot determine the intent clearly
+- calculation: Mathematical operations or numerical computations. Includes questions about documents that require aggregating, computing, or deriving numeric values.
+- unknown: Cannot determine the intent clearly or the request is ambiguous.
+
+CLASSIFICATION EXAMPLES:
+
+QA Category:
+✓ "Who is the vendor in document CON-001?"
+✓ "Find documents over $50,000"
+✓ "What is the contract duration?"
+
+Summarization Category:
+✓ "Summarize all the contracts"
+✓ "Give me the key points from this invoice"
+✓ "Extract the main findings from the report"
+
+Calculation Category:
+✓ "What's the total amount in invoice INV-001?"
+✓ "Add up all invoice totals"
+✓ "Calculate the average cost across documents"
+✓ "What is the difference between these two line items?"
+
+CONFIDENCE SCORING GUIDELINES (0.0 to 1.0):
+
+0.9–1.0: Very clear intent
+  - Input clearly and unambiguously matches one category
+  - Strong keyword indicators present (e.g., "total", "summarize", "who is")
+  
+0.7–0.89: Good fit; minor ambiguity
+  - Clear intent with slightly mixed signals
+  - Mostly aligns with one category but could have secondary interpretation
+  
+0.5–0.69: Moderate fit; multiple plausible categories
+  - Could reasonably belong to more than one category
+  - Context from conversation history would help clarify
+  - Example: "How much did we spend?" (could be qa or calculation depending on context)
+  
+Below 0.5: Assign "unknown"
+  - Intent is unclear or ambiguous
+  - Request doesn't fit primary categories well
+  - Insufficient context to determine user's goal
+
+REASONING FORMAT:
+Briefly explain why you chose this intent (1-2 sentences). Include:
+- Which keywords or phrasing led to your choice
+- Why other categories were ruled out if relevant
+- If confidence is below 0.7, note the ambiguity
+
+OUTPUT FORMAT (return as JSON):
+{{
+  "intent": "<qa|summarization|calculation|unknown>",
+  "confidence": <float 0.0-1.0>,
+  "reasoning": "<brief explanation>"
+}}
 
 User Input: {user_input}
 
 Recent Conversation History:
 {conversation_history}
 
-Analyze the user's request and classify their intent with a confidence score and brief reasoning.
-"""
+Classify the user's request and provide your response in the JSON format above."""
     )
 
 
